@@ -116,6 +116,8 @@ php artisan queue:work rabbitmq --queue=auth.notifications,default
 
 ### 5. OAuth (опционально)
 
+Пошаговая инструкция для ВКонтакте: [VK.md](VK.md).
+
 Добавьте credentials в `config/services.php`:
 
 ```php

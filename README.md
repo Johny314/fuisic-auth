@@ -38,6 +38,7 @@ php artisan migrate
 | [docs/INSTALLATION.md](docs/INSTALLATION.md) | Установка и подключение к проекту |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Переменные окружения и config |
 | [docs/API.md](docs/API.md) | HTTP-эндпоинты и примеры запросов |
+| [docs/VK.md](docs/VK.md) | Настройка OAuth ВКонтакте |
 
 ## Модель пользователя
 

@@ -5,8 +5,10 @@ namespace Fuisic\Auth\Http\Controllers;
 use Fuisic\Auth\Enums\OAuthProvider;
 use Fuisic\Auth\Services\OAuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class OAuthController extends Controller
 {
@@ -30,15 +32,40 @@ class OAuthController extends Controller
         ]);
     }
 
-    public function callback(string $provider, Request $request, OAuthService $oauth): JsonResponse
+    public function callback(string $provider, Request $request, OAuthService $oauth): JsonResponse|RedirectResponse
     {
-        $validated = $request->validate([
-            'state' => ['required', 'string'],
-        ]);
+        $frontend = rtrim((string) config('fuisic-auth.frontend_url'), '/');
+        $wantsJson = $request->expectsJson();
 
-        $result = $oauth->handleCallback($provider, $validated['state']);
+        try {
+            $state = $request->query('state', $request->input('state'));
 
-        return response()->json($result);
+            if (! is_string($state) || $state === '') {
+                throw new BadRequestHttpException(__('fuisic-auth::auth.oauth_state_invalid'));
+            }
+
+            $result = $oauth->handleCallback($provider, $state);
+
+            if ($wantsJson) {
+                return response()->json($result);
+            }
+
+            if ($result['linked'] ?? false) {
+                return redirect()->away($frontend.'/profile/edit?oauth=linked&provider='.urlencode((string) $result['provider']));
+            }
+
+            $redirect = config('fuisic-auth.oauth.redirect_after_login') ?: $frontend.'/auth/oauth-callback';
+
+            return redirect()->away($redirect.'?token='.urlencode((string) $result['token']));
+        } catch (\Throwable $e) {
+            if ($wantsJson) {
+                $code = $e instanceof BadRequestHttpException ? 400 : 500;
+
+                return response()->json(['message' => $e->getMessage()], $code);
+            }
+
+            return redirect()->away($frontend.'/auth/auth?oauth_error='.urlencode($e->getMessage()));
+        }
     }
 
     public function unlink(string $provider, Request $request, OAuthService $oauth): JsonResponse

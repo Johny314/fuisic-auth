@@ -3,15 +3,11 @@
 namespace Fuisic\Auth\Notifications;
 
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\URL;
 
-class VerifyEmailNotification extends BaseVerifyEmail implements ShouldQueue
+class VerifyEmailNotification extends BaseVerifyEmail
 {
-    use Queueable;
-
     public function via($notifiable): array
     {
         return ['mail'];
@@ -33,10 +29,12 @@ class VerifyEmailNotification extends BaseVerifyEmail implements ShouldQueue
     {
         return (new MailMessage)
             ->subject(__('fuisic-auth::auth.verify_email_subject'))
-            ->line(__('fuisic-auth::auth.verify_email_line'))
-            ->action(__('fuisic-auth::auth.verify_email_action'), $this->verificationUrl($notifiable))
-            ->line(__('fuisic-auth::auth.verify_email_expiry', [
-                'count' => config('fuisic-auth.verification.expire'),
-            ]));
+            ->view('fuisic-auth::mail.verify-email', [
+                'name' => $notifiable->name ?? '',
+                'url' => $this->verificationUrl($notifiable),
+                'intro' => __('fuisic-auth::auth.verify_email_line'),
+                'action' => __('fuisic-auth::auth.verify_email_action'),
+                'expire' => config('fuisic-auth.verification.expire'),
+            ]);
     }
 }

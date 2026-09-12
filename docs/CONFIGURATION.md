@@ -19,6 +19,8 @@
 | `FUISIC_AUTH_PASSKEYS_ENABLED` | `true` | Включить passkeys |
 | `FUISIC_AUTH_PASSKEY_RP_NAME` | `APP_NAME` | Имя relying party |
 | `FUISIC_AUTH_PASSKEY_RP_ID` | — | Домен для WebAuthn (например `localhost`) |
+| `WEBAUTHN_ID` | из RP ID пакета | Дублирует relying party id Laragear |
+| `WEBAUTHN_ORIGINS` | `FRONTEND_URL` | Origin фронта (`http://localhost:8081`) |
 
 ### OAuth credentials
 
@@ -62,16 +64,35 @@
 
 Пакет отправляет:
 
-- письмо подтверждения email;
-- письмо сброса пароля.
+- письмо подтверждения email (шаблон `resources/views/mail/verify-email.blade.php`);
+- письмо сброса пароля (шаблон `resources/views/mail/reset-password.blade.php`).
 
-Настройте `MAIL_*` в `.env`. Для локальной разработки можно использовать `MAIL_MAILER=log`.
+Ссылка из письма подтверждения ведёт на API (`/email/verify/{id}/{hash}`), затем браузер редиректится на `{FRONTEND_URL}/auth/verified?status=ok|already|invalid`.
+
+Настройте `MAIL_*` и `FRONTEND_URL` в `.env`.
+
+Локально в `fuisic_back` поднят **Mailpit**:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+MAIL_FROM_ADDRESS=noreply@fuisic.local
+FRONTEND_URL=http://localhost:8081
+```
+
+Письма смотрите в UI: [http://localhost:8025](http://localhost:8025). `MAIL_MAILER=log` ничего в почтовый ящик не кладёт — только в `storage/logs/laravel.log`.
 
 ## Passkeys (WebAuthn)
 
-- `FUISIC_AUTH_PASSKEY_RP_ID` должен совпадать с доменом, с которого идут запросы (без порта для production).
+- `FUISIC_AUTH_PASSKEY_RP_ID` / `WEBAUTHN_ID` должен совпадать с хостом фронта (без порта): для локальной разработки `localhost`.
+- `WEBAUTHN_ORIGINS` — origin фронта, например `http://localhost:8081` (API на `:8080` сам по себе недостаточно).
+- Челленджи WebAuthn хранятся в кэше Laravel, сессия браузера не нужна.
+- Провайдер пользователей: `eloquent-webauthn` с `password_fallback`, чтобы пароль и passkey работали вместе.
 - На localhost passkeys работают в Chrome/Safari при `RP_ID=localhost`.
 - Для Apple Face ID / Touch ID используется стандарт WebAuthn — отдельный Apple OAuth не требуется.
+
+Подробнее про VK: [VK.md](VK.md).
 
 ## Middleware
 

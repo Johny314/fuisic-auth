@@ -24,6 +24,7 @@ return [
     'oauth_unlinked' => 'OAuth-провайдер отвязан.',
     'cannot_unlink_last_method' => 'Нельзя отвязать последний способ входа без пароля.',
     'unauthenticated' => 'Требуется авторизация.',
+    'passkey_login_failed' => 'Не удалось войти по passkey.',
     'passkey_registered' => 'Passkey успешно добавлен.',
     'verification_invalid' => 'Ссылка для подтверждения недействительна или устарела.',
     'passkey_removed' => 'Passkey удалён.',

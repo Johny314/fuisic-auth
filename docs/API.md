@@ -137,7 +137,13 @@ Signed URL из письма. Подтверждает email без автори
 
 ### GET `/oauth/{provider}/callback?state=...`
 
-Обрабатывает callback (Socialite stateless). **200**:
+Браузерный callback от провайдера. Редирект на фронт:
+
+- логин: `{FRONTEND_URL}/auth/oauth-callback?token=...`
+- привязка: `{FRONTEND_URL}/profile/edit?oauth=linked&provider=...`
+- ошибка: `{FRONTEND_URL}/auth/auth?oauth_error=...`
+
+Если запрос с `Accept: application/json`, вместо редиректа отдаётся JSON:
 
 ```json
 {
@@ -146,7 +152,7 @@ Signed URL из письма. Подтверждает email без автори
 }
 ```
 
-При привязке (`link`) — `{ "linked": true, "provider": "vkontakte" }`.
+При привязке (`link`) в JSON: `{ "linked": true, "provider": "vkontakte" }`.
 
 ### GET `/oauth/{provider}/link` 🔒
 

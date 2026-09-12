@@ -16,7 +16,6 @@ Route::post('password/forgot', [PasswordResetController::class, 'forgot'])->name
 Route::post('password/reset', [PasswordResetController::class, 'reset'])->name('fuisic-auth.password.reset');
 
 Route::get('email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-    ->middleware(['signed'])
     ->name('fuisic-auth.verification.verify');
 
 Route::get('oauth/{provider}/redirect', [OAuthController::class, 'redirect'])->name('fuisic-auth.oauth.redirect');
