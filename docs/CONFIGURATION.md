@@ -71,7 +71,7 @@
 
 Настройте `MAIL_*` и `FRONTEND_URL` в `.env`.
 
-Локально в `fuisic_back` поднят **Mailpit**:
+Локально в `fuisic-back` поднят **Mailpit**:
 
 ```env
 MAIL_MAILER=smtp

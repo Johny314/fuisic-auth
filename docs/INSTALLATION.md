@@ -9,17 +9,17 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/Johny314/fuisic-laravel-auth"
+            "url": "https://github.com/Johny314/fuisic-auth"
         }
     ],
     "require": {
-        "fuisic/laravel-auth": "^1.0"
+        "fuisic/auth": "^1.0"
     }
 }
 ```
 
 ```bash
-composer update fuisic/laravel-auth
+composer update fuisic/auth
 ```
 
 ### Локальная разработка (path repository)
@@ -28,8 +28,8 @@ composer update fuisic/laravel-auth
 
 ```
 FUISIC/
-├── fuisic_back/
-└── fuisic-laravel-auth/
+├── fuisic-back/
+└── fuisic-auth/
 ```
 
 ```json
@@ -37,22 +37,22 @@ FUISIC/
     "repositories": [
         {
             "type": "path",
-            "url": "../fuisic-laravel-auth",
+            "url": "../fuisic-auth",
             "options": { "symlink": true }
         }
     ],
     "require": {
-        "fuisic/laravel-auth": "@dev"
+        "fuisic/auth": "@dev"
     }
 }
 ```
 
-В Docker смонтируйте соседний каталог (как в `fuisic_back/docker-compose-local.yml`):
+В Docker смонтируйте соседний каталог (как в `fuisic-back/docker-compose-local.yml`):
 
 ```yaml
 volumes:
   - '.:/var/www/html'
-  - '../fuisic-laravel-auth:/var/www/html/../fuisic-laravel-auth:ro'
+  - '../fuisic-auth:/var/www/html/../fuisic-auth:ro'
 ```
 
 ## Laravel

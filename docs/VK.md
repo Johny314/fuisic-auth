@@ -1,6 +1,6 @@
 # Авторизация через ВКонтакте
 
-Код уже есть в пакете `fuisic-laravel-auth`. Чтобы кнопка **VK** на экране входа заработала, нужно приложение VK и несколько переменных в `.env` бэкенда. Без этого API отвечает «OAuth-провайдер отключён».
+Код уже есть в пакете `fuisic-auth`. Чтобы кнопка **VK** на экране входа заработала, нужно приложение VK и несколько переменных в `.env` бэкенда. Без этого API отвечает «OAuth-провайдер отключён».
 
 ## Что уже сделано в коде
 
@@ -59,7 +59,7 @@ VKONTAKTE_REDIRECT_URI=http://localhost:8080/oauth/vkontakte/callback
 Перезапустите PHP-FPM / контейнер `app`, чтобы подтянуть env:
 
 ```bash
-cd fuisic_back
+cd fuisic-back
 docker compose exec app php artisan config:clear
 ```
 

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **BREAKING:** пакет переименован `fuisic/laravel-auth` → `fuisic/auth`, репозиторий `fuisic-laravel-auth` → `fuisic-auth`. В приложении: `composer remove fuisic/laravel-auth && composer require fuisic/auth`, path repository `../fuisic-auth`. Namespace `Fuisic\Auth\` и конфиг `fuisic-auth.php` не менялись.
+
 ## 1.1.0 - 2026-09-12
 
 - `/me` отдаёт `user_type` и `avatar_url`
