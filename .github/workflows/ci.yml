@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PHP_VERSION: '8.3'
+  PHP_EXTENSIONS: pdo_pgsql, intl, gd, bcmath, gmp, zip, sockets, redis
+
+jobs:
+  pint:
+    name: Pint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer, pint:1.21.0
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
+
+      - name: Pint
+        run: pint --test
+
+  # У пакета нет своих тестов — проверяем его в составе приложения fuisic-back
+  back-tests:
+    name: fuisic-back tests
+    runs-on: ubuntu-latest
+
+    services:
+      pgsql:
+        image: postgres:15
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: fuisic
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fuisic -d testing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: testing
+      DB_USERNAME: fuisic
+      DB_PASSWORD: secret
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: fuisic-auth
+
+      # ветка fuisic-back с тем же именем (связанные изменения), иначе main
+      - name: Resolve fuisic-back ref
+        id: back
+        run: |
+          branch="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          if git ls-remote --exit-code --heads https://github.com/Johny314/fuisic-back.git "$branch" >/dev/null; then
+            echo "ref=$branch" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          repository: Johny314/fuisic-back
+          ref: ${{ steps.back.outputs.ref }}
+          path: fuisic-back
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('fuisic-back/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Prepare environment
+        working-directory: fuisic-back
+        run: |
+          cp .env.example .env
+          composer install --no-interaction --no-progress --prefer-dist
+          php artisan key:generate
+
+      - name: PHPUnit
+        working-directory: fuisic-back
+        run: php artisan test
