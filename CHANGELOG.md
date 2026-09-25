@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+## 2.0.0 - 2026-09-26
+
 - **BREAKING:** пакет переименован `fuisic/laravel-auth` → `fuisic/auth`, репозиторий `fuisic-laravel-auth` → `fuisic-auth`. В приложении: `composer remove fuisic/laravel-auth && composer require fuisic/auth`, path repository `../fuisic-auth`. Namespace `Fuisic\Auth\` и конфиг `fuisic-auth.php` не менялись.
+- `pint.json` (preset laravel, как в fuisic-back).
+- CI: Pint, `composer validate` и тесты fuisic-back против текущей версии пакета.
 
 ## 1.1.0 - 2026-09-12
 
