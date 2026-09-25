@@ -1,5 +1,5 @@
 {
-    "name": "fuisic/laravel-auth",
+    "name": "fuisic/auth",
     "description": "Reusable Laravel authentication with OAuth, email verification, passkeys and RabbitMQ",
     "type": "library",
     "license": "MIT",
@@ -7,7 +7,7 @@
     "authors": [
         {
             "name": "FUISIC",
-            "homepage": "https://github.com/FUISIC"
+            "homepage": "https://github.com/Johny314/fuisic-auth"
         }
     ],
     "require": {

@@ -1,4 +1,4 @@
-# fuisic/laravel-auth
+# fuisic/auth
 
 Laravel-пакет авторизации для API-проектов FUISIC: Sanctum-токены, подтверждение email через RabbitMQ, OAuth (ВКонтакте, Яндекс), passkeys (WebAuthn) и сброс пароля.
 
@@ -22,7 +22,7 @@ Laravel-пакет авторизации для API-проектов FUISIC: Sa
 ## Быстрый старт
 
 ```bash
-composer require fuisic/laravel-auth
+composer require fuisic/auth
 php artisan vendor:publish --tag=fuisic-auth-config
 php artisan vendor:publish --tag=fuisic-auth-migrations
 php artisan vendor:publish --provider="Laragear\WebAuthn\WebAuthnServiceProvider" --tag="migrations"
@@ -56,7 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail, WebAuthnAuthentic
 
 ## Используется в
 
-- [fuisic_back](https://github.com/Johny314/fuisic_back) — backend FUISIC
+- [fuisic-back](https://github.com/Johny314/fuisic-back) — backend FUISIC
 
 ## Лицензия
 
