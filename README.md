@@ -1,5 +1,7 @@
 # fuisic/auth
 
+[![CI](https://github.com/Johny314/fuisic-auth/actions/workflows/ci.yml/badge.svg)](https://github.com/Johny314/fuisic-auth/actions/workflows/ci.yml)
+
 Laravel-пакет авторизации для API-проектов FUISIC: Sanctum-токены, подтверждение email через RabbitMQ, OAuth (ВКонтакте, Яндекс), passkeys (WebAuthn) и сброс пароля.
 
 ## Возможности
