@@ -15,8 +15,8 @@ Laravel-пакет авторизации для API-проектов FUISIC: Sa
 
 ## Требования
 
-- PHP 8.2+
-- Laravel 11+
+- PHP 8.4+
+- Laravel 13+
 - PostgreSQL / MySQL (любая БД Laravel)
 - RabbitMQ (для очередей писем)
 - Redis (рекомендуется для кэша)
@@ -27,7 +27,7 @@ Laravel-пакет авторизации для API-проектов FUISIC: Sa
 composer require fuisic/auth
 php artisan vendor:publish --tag=fuisic-auth-config
 php artisan vendor:publish --tag=fuisic-auth-migrations
-php artisan vendor:publish --provider="Laragear\WebAuthn\WebAuthnServiceProvider" --tag="migrations"
+php artisan vendor:publish --tag=passkeys-migrations
 php artisan migrate
 ```
 
@@ -47,10 +47,10 @@ php artisan migrate
 ```php
 use Fuisic\Auth\Traits\HasFuisicAuth;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Laragear\WebAuthn\Contracts\WebAuthnAuthenticatable;
+use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements MustVerifyEmail, WebAuthnAuthenticatable
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     use HasApiTokens, HasFuisicAuth;
 }

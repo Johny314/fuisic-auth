@@ -4,12 +4,12 @@ namespace Fuisic\Auth\Traits;
 
 use Fuisic\Auth\Jobs\SendVerificationEmailJob;
 use Fuisic\Auth\Notifications\ResetPasswordNotification;
-use Laragear\WebAuthn\WebAuthnAuthentication;
+use Laravel\Passkeys\PasskeyAuthenticatable;
 
 trait HasFuisicAuth
 {
     use HasOAuthAccounts;
-    use WebAuthnAuthentication;
+    use PasskeyAuthenticatable;
 
     public function sendEmailVerificationNotification(): void
     {

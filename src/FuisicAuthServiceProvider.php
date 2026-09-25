@@ -3,11 +3,10 @@
 namespace Fuisic\Auth;
 
 use Fuisic\Auth\Listeners\SocialiteWasCalledListener;
-use Fuisic\Auth\WebAuthn\CacheChallengeRepository;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Laragear\WebAuthn\Contracts\WebAuthnChallengeRepository;
+use Laravel\Passkeys\Passkeys;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class FuisicAuthServiceProvider extends ServiceProvider
@@ -16,12 +15,13 @@ class FuisicAuthServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/fuisic-auth.php', 'fuisic-auth');
 
-        $this->app->bind(WebAuthnChallengeRepository::class, CacheChallengeRepository::class);
+        // Свои API-маршруты passkeys (токены вместо сессии) — маршруты пакета не нужны
+        Passkeys::ignoreRoutes();
     }
 
     public function boot(): void
     {
-        $this->syncWebAuthnConfig();
+        $this->syncPasskeysConfig();
 
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'fuisic-auth');
@@ -49,19 +49,19 @@ class FuisicAuthServiceProvider extends ServiceProvider
         });
     }
 
-    private function syncWebAuthnConfig(): void
+    private function syncPasskeysConfig(): void
     {
         $rpId = config('fuisic-auth.passkeys.relying_party.id')
             ?: parse_url((string) config('app.url'), PHP_URL_HOST);
 
-        $rpName = config('fuisic-auth.passkeys.relying_party.name') ?: config('app.name');
         $frontend = rtrim((string) config('fuisic-auth.frontend_url'), '/');
-        $origins = config('webauthn.origins') ?: $frontend;
 
         config([
-            'webauthn.relying_party.id' => $rpId,
-            'webauthn.relying_party.name' => $rpName,
-            'webauthn.origins' => $origins,
+            'passkeys.relying_party_id' => $rpId,
+            'passkeys.allowed_origins' => array_values(array_filter(array_unique([
+                $frontend,
+                rtrim((string) config('app.url'), '/'),
+            ]))),
         ]);
     }
 }

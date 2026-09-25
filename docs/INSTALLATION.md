@@ -52,7 +52,7 @@ FUISIC/
 ```yaml
 volumes:
   - '.:/var/www/html'
-  - '../fuisic-auth:/var/www/html/../fuisic-auth:ro'
+  - '../fuisic-auth:/var/www/fuisic-auth:ro'
 ```
 
 ## Laravel
@@ -64,7 +64,7 @@ volumes:
 ```bash
 php artisan vendor:publish --tag=fuisic-auth-config
 php artisan vendor:publish --tag=fuisic-auth-migrations
-php artisan vendor:publish --provider="Laragear\WebAuthn\WebAuthnServiceProvider" --tag="migrations"
+php artisan vendor:publish --tag=passkeys-migrations
 php artisan migrate
 ```
 
@@ -74,10 +74,10 @@ php artisan migrate
 use Fuisic\Auth\Traits\HasFuisicAuth;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laragear\WebAuthn\Contracts\WebAuthnAuthenticatable;
+use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements MustVerifyEmail, WebAuthnAuthenticatable
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     use HasApiTokens, HasFuisicAuth;
 

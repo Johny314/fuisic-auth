@@ -168,12 +168,12 @@ Signed URL из письма. Подтверждает email без автори
 
 ## Passkeys (WebAuthn)
 
-Требует `@simplewebauthn/browser` или аналог на фронтенде.
+Сервер — [laravel/passkeys](https://github.com/laravel/passkeys-server); на фронте достаточно `navigator.credentials` (base64url ↔ ArrayBuffer), см. `fuisic-front/utils/passkeys.ts`.
 
 | Метод | URL | Auth |
 |-------|-----|------|
-| POST | `/passkeys/login/options` | — |
-| POST | `/passkeys/login` | — |
+| POST | `/passkeys/login/options` | — (throttle) |
+| POST | `/passkeys/login` | — (throttle) |
 | GET | `/passkeys` | 🔒 |
 | POST | `/passkeys/register/options` | 🔒 |
 | POST | `/passkeys/register` | 🔒 |
@@ -181,13 +181,17 @@ Signed URL из письма. Подтверждает email без автори
 
 ### Login flow
 
-1. `POST /passkeys/login/options` → options для `navigator.credentials.get()`
-2. `POST /passkeys/login` с результатом → `{ token, user }`
+1. `POST /passkeys/login/options` → `{ options }` для `navigator.credentials.get({ publicKey: options })`
+2. `POST /passkeys/login` с `{ credential }` → `{ token, user }`
 
 ### Register flow (для авторизованного пользователя)
 
-1. `POST /passkeys/register/options` → options для `navigator.credentials.create()`
-2. `POST /passkeys/register` с attestation → passkey сохранён
+1. `POST /passkeys/register/options` → `{ options }` для `navigator.credentials.create({ publicKey: options })`
+2. `POST /passkeys/register` с `{ name, credential }` → `201`, passkey сохранён
+
+`credential` — сериализованный `PublicKeyCredential`: `{ id, rawId, type: "public-key", response: {...} }` (бинарные поля в base64url). Опции одноразовые и живут `timeout` (60 с); повторная или просроченная попытка → `422` с ошибкой в поле `credential`.
+
+`GET /passkeys` → `{ passkeys: [{ id, name, last_used_at, created_at }] }`.
 
 ## Коды ошибок
 
@@ -196,7 +200,8 @@ Signed URL из письма. Подтверждает email без автори
 | 401 | Неверный login / нет токена |
 | 403 | Email не подтверждён / невалидная verification URL |
 | 404 | OAuth-провайдер отключён |
-| 422 | Validation errors |
+| 422 | Validation errors (в т.ч. невалидный/просроченный passkey) |
+| 429 | Слишком много попыток входа/регистрации (`throttle`) |
 
 ## Route names
 
