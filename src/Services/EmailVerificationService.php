@@ -4,6 +4,7 @@ namespace Fuisic\Auth\Services;
 
 use Fuisic\Auth\Jobs\SendVerificationEmailJob;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Validation\ValidationException;
 
 class EmailVerificationService
 {
@@ -25,7 +26,7 @@ class EmailVerificationService
         }
 
         if (! $user->hasVerifiedEmail()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'email' => [__('fuisic-auth::auth.email_not_verified')],
             ])->status(403);
         }

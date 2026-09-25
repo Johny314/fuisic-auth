@@ -4,6 +4,7 @@ namespace Fuisic\Auth\Services;
 
 use Fuisic\Auth\Enums\OAuthProvider;
 use Fuisic\Auth\Models\OAuthAccount;
+use Fuisic\Auth\Support\UserModel;
 use Fuisic\Auth\Traits\HasOAuthAccounts;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
@@ -159,7 +160,7 @@ class OAuthService
 
     private function resolveUserModel(): string
     {
-        return \Fuisic\Auth\Support\UserModel::class();
+        return UserModel::class();
     }
 
     private function serializeUser(Authenticatable $user): array
