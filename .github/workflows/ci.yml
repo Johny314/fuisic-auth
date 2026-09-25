@@ -26,14 +26,18 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          tools: composer, pint:1.21.0
           coverage: none
 
       - name: Validate composer.json
         run: composer validate --no-check-publish
 
+      # та же версия Pint, что в composer.lock fuisic-back
+      - name: Install Pint
+        run: composer global require --no-interaction --no-progress laravel/pint:1.21.0
+
       - name: Pint
-        run: pint --test
+        run: |
+          "$(composer global config bin-dir --absolute --quiet)/pint" --test
 
   # У пакета нет своих тестов — проверяем его в составе приложения fuisic-back
   back-tests:
@@ -101,6 +105,7 @@ jobs:
         working-directory: fuisic-back
         run: |
           cp .env.example .env
+          mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/app/public bootstrap/cache
           composer install --no-interaction --no-progress --prefer-dist
           php artisan key:generate
 
