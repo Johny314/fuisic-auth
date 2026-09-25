@@ -4,7 +4,6 @@ namespace Fuisic\Auth\Traits;
 
 use Fuisic\Auth\Jobs\SendVerificationEmailJob;
 use Fuisic\Auth\Notifications\ResetPasswordNotification;
-use Fuisic\Auth\Notifications\VerifyEmailNotification;
 use Laragear\WebAuthn\WebAuthnAuthentication;
 
 trait HasFuisicAuth
