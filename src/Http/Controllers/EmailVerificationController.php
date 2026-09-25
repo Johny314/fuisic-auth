@@ -2,6 +2,8 @@
 
 namespace Fuisic\Auth\Http\Controllers;
 
+use Fuisic\Auth\Services\EmailVerificationService;
+use Fuisic\Auth\Support\UserModel;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +22,7 @@ class EmailVerificationController extends Controller
             return $this->verifiedResponse($wantsJson, $frontend, 'invalid', __('fuisic-auth::auth.verification_invalid'), 403);
         }
 
-        $userModel = \Fuisic\Auth\Support\UserModel::class();
+        $userModel = UserModel::class();
         $user = $userModel::query()->findOrFail($id);
 
         if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
@@ -38,7 +40,7 @@ class EmailVerificationController extends Controller
         return $this->verifiedResponse($wantsJson, $frontend, 'ok', __('fuisic-auth::auth.email_verified'));
     }
 
-    public function resend(Request $request, \Fuisic\Auth\Services\EmailVerificationService $verification): JsonResponse
+    public function resend(Request $request, EmailVerificationService $verification): JsonResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
             return response()->json(['message' => __('fuisic-auth::auth.email_already_verified')]);

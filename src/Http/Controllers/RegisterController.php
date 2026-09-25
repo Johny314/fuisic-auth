@@ -5,6 +5,7 @@ namespace Fuisic\Auth\Http\Controllers;
 use Fuisic\Auth\Jobs\SendVerificationEmailJob;
 use Fuisic\Auth\Services\AuthTokenService;
 use Fuisic\Auth\Services\EmailVerificationService;
+use Fuisic\Auth\Support\UserModel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class RegisterController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ], config('fuisic-auth.register.validation', [])));
 
-        $userModel = \Fuisic\Auth\Support\UserModel::class();
+        $userModel = UserModel::class();
         $attributes = array_merge(
             config('fuisic-auth.register.defaults', []),
             collect($validated)->only(array_merge(

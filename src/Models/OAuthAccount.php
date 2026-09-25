@@ -2,6 +2,7 @@
 
 namespace Fuisic\Auth\Models;
 
+use Fuisic\Auth\Support\UserModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -34,6 +35,6 @@ class OAuthAccount extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(\Fuisic\Auth\Support\UserModel::class(), 'user_id');
+        return $this->belongsTo(UserModel::class(), 'user_id');
     }
 }
