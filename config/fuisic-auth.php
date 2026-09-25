@@ -6,6 +6,9 @@ return [
 
     'auth_middleware' => ['auth:sanctum'],
 
+    // Лимит для login/register/password/passkey-login (попыток в минуту с одного IP)
+    'throttle' => ['throttle:10,1'],
+
     'user_model' => env('FUISIC_AUTH_USER_MODEL'),
 
     'token_name' => env('FUISIC_AUTH_TOKEN_NAME', 'api-token'),

@@ -2,57 +2,89 @@
 
 namespace Fuisic\Auth\Http\Controllers;
 
+use Fuisic\Auth\Passkeys\PasskeyOptionsStore;
 use Fuisic\Auth\Services\AuthTokenService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Laragear\WebAuthn\Http\Requests\AssertedRequest;
-use Laragear\WebAuthn\Http\Requests\AssertionRequest;
-use Laragear\WebAuthn\Http\Requests\AttestationRequest;
-use Laragear\WebAuthn\Http\Requests\AttestedRequest;
+use Illuminate\Validation\ValidationException;
+use Laravel\Passkeys\Actions\DeletePasskey;
+use Laravel\Passkeys\Actions\GenerateRegistrationOptions;
+use Laravel\Passkeys\Actions\GenerateVerificationOptions;
+use Laravel\Passkeys\Actions\StorePasskey;
+use Laravel\Passkeys\Actions\VerifyPasskey;
+use Laravel\Passkeys\Passkeys;
+use Laravel\Passkeys\Support\WebAuthn;
+use Throwable;
+use Webauthn\PublicKeyCredential;
+use Webauthn\PublicKeyCredentialCreationOptions;
+use Webauthn\PublicKeyCredentialRequestOptions;
 
+/**
+ * Passkeys поверх laravel/passkeys для API на Sanctum-токенах: опции церемоний
+ * хранятся в кэше (PasskeyOptionsStore), а не в сессии.
+ */
 class PasskeyController extends Controller
 {
+    public function __construct(
+        private readonly PasskeyOptionsStore $options,
+    ) {}
+
     public function index(Request $request): JsonResponse
     {
-        $credentials = $request->user()->webAuthnCredentials()
-            ->select(['id', 'alias', 'origin', 'created_at', 'updated_at'])
+        $passkeys = $request->user()->passkeys()
+            ->select(['id', 'name', 'last_used_at', 'created_at'])
+            ->latest()
             ->get();
 
-        return response()->json(['passkeys' => $credentials]);
+        return response()->json(['passkeys' => $passkeys]);
     }
 
-    public function registerOptions(AttestationRequest $request): JsonResponse
+    public function registerOptions(Request $request, GenerateRegistrationOptions $generate): JsonResponse
     {
-        return $request
-            ->fastRegistration()
-            ->userless()
-            ->allowDuplicates()
-            ->toCreate()
-            ->toResponse($request);
+        $options = $generate($request->user());
+        $this->options->put($options);
+
+        return response()->json(['options' => WebAuthn::toBrowserArray($options)]);
     }
 
-    public function register(AttestedRequest $request): JsonResponse
+    public function register(Request $request, StorePasskey $store): JsonResponse
     {
-        $request->save();
+        $request->validate(['name' => ['nullable', 'string', 'max:255']]);
+        $credential = $this->credential($request);
 
-        return response()->json(['message' => __('fuisic-auth::auth.passkey_registered')]);
+        $options = $this->options->pull($credential, PublicKeyCredentialCreationOptions::class)
+            ?? $this->expired();
+
+        $this->attempt(fn () => $store(
+            $request->user(),
+            $request->string('name')->trim()->value() ?: __('fuisic-auth::auth.passkey_default_name'),
+            $credential,
+            $options,
+        ));
+
+        return response()->json(['message' => __('fuisic-auth::auth.passkey_registered')], 201);
     }
 
-    public function loginOptions(AssertionRequest $request): JsonResponse
+    public function loginOptions(GenerateVerificationOptions $generate): JsonResponse
     {
-        return $request->toVerify(null)->toResponse($request);
+        $options = $generate();
+        $this->options->put($options);
+
+        return response()->json(['options' => WebAuthn::toBrowserArray($options)]);
     }
 
-    public function login(AssertedRequest $request, AuthTokenService $tokens): JsonResponse
+    public function login(Request $request, VerifyPasskey $verify, AuthTokenService $tokens): JsonResponse
     {
-        $credentials = $request->validated();
-        $provider = Auth::createUserProvider('users');
+        $credential = $this->credential($request);
 
-        $user = $provider?->retrieveByCredentials($credentials);
+        $options = $this->options->pull($credential, PublicKeyCredentialRequestOptions::class)
+            ?? $this->expired();
 
-        if (! $user || ! $provider->validateCredentials($user, $credentials)) {
+        $passkey = $this->attempt(fn () => $verify($credential, $options));
+        $user = $passkey->user;
+
+        if (! Passkeys::allowsLogin($request, $passkey)) {
             return response()->json(['message' => __('fuisic-auth::auth.passkey_login_failed')], 401);
         }
 
@@ -67,14 +99,58 @@ class PasskeyController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, string $id): JsonResponse
+    public function destroy(Request $request, string $id, DeletePasskey $delete): JsonResponse
     {
-        $deleted = $request->user()->webAuthnCredentials()->whereKey($id)->delete();
+        $passkey = $request->user()->passkeys()->find($id);
 
-        if (! $deleted) {
-            return response()->json(['message' => __('fuisic-auth::auth.passkey_removed')], 404);
+        if (! $passkey) {
+            return response()->json(['message' => __('fuisic-auth::auth.passkey_not_found')], 404);
         }
 
+        $delete($request->user(), $passkey);
+
         return response()->json(['message' => __('fuisic-auth::auth.passkey_removed')]);
+    }
+
+    private function credential(Request $request): PublicKeyCredential
+    {
+        $request->validate([
+            'credential' => ['required', 'array'],
+            'credential.id' => ['required', 'string'],
+            'credential.rawId' => ['required', 'string'],
+            'credential.type' => ['required', 'string', 'in:public-key'],
+            'credential.response' => ['required', 'array'],
+        ]);
+
+        try {
+            return WebAuthn::fromJson(json_encode($request->input('credential')) ?: '{}', PublicKeyCredential::class);
+        } catch (Throwable) {
+            throw ValidationException::withMessages(['credential' => __('fuisic-auth::auth.passkey_invalid')]);
+        }
+    }
+
+    /**
+     * @template T
+     *
+     * @param  callable(): T  $ceremony
+     * @return T
+     */
+    private function attempt(callable $ceremony): mixed
+    {
+        try {
+            return $ceremony();
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (Throwable $e) {
+            // ошибки проверки подписи/attestation из webauthn-lib — это невалидный credential, а не 500
+            report($e);
+
+            throw ValidationException::withMessages(['credential' => __('fuisic-auth::auth.passkey_invalid')]);
+        }
+    }
+
+    private function expired(): never
+    {
+        throw ValidationException::withMessages(['credential' => __('fuisic-auth::auth.passkey_expired')]);
     }
 }

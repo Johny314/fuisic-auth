@@ -33,7 +33,7 @@ jobs:
 
       # та же версия Pint, что в composer.lock fuisic-back
       - name: Install Pint
-        run: composer global require --no-interaction --no-progress laravel/pint:1.21.0
+        run: composer global require --no-interaction --no-progress laravel/pint:1.32.1
 
       - name: Pint
         run: |

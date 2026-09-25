@@ -19,8 +19,6 @@
 | `FUISIC_AUTH_PASSKEYS_ENABLED` | `true` | Включить passkeys |
 | `FUISIC_AUTH_PASSKEY_RP_NAME` | `APP_NAME` | Имя relying party |
 | `FUISIC_AUTH_PASSKEY_RP_ID` | — | Домен для WebAuthn (например `localhost`) |
-| `WEBAUTHN_ID` | из RP ID пакета | Дублирует relying party id Laragear |
-| `WEBAUTHN_ORIGINS` | `FRONTEND_URL` | Origin фронта (`http://localhost:8081`) |
 
 ### OAuth credentials
 
@@ -85,10 +83,11 @@ FRONTEND_URL=http://localhost:8081
 
 ## Passkeys (WebAuthn)
 
-- `FUISIC_AUTH_PASSKEY_RP_ID` / `WEBAUTHN_ID` должен совпадать с хостом фронта (без порта): для локальной разработки `localhost`.
-- `WEBAUTHN_ORIGINS` — origin фронта, например `http://localhost:8081` (API на `:8080` сам по себе недостаточно).
-- Челленджи WebAuthn хранятся в кэше Laravel, сессия браузера не нужна.
-- Провайдер пользователей: `eloquent-webauthn` с `password_fallback`, чтобы пароль и passkey работали вместе.
+- Реализация — [laravel/passkeys](https://github.com/laravel/passkeys-server) (Actions), маршруты пакета отключены: свои API-маршруты на Sanctum-токенах.
+- `FUISIC_AUTH_PASSKEY_RP_ID` должен совпадать с хостом фронта (без порта): для локальной разработки `localhost`.
+- Разрешённые origin — `FRONTEND_URL` и `APP_URL` (например `http://localhost:8081`).
+- Опции церемоний хранятся в кэше Laravel по challenge и выдаются один раз — сессия браузера не нужна.
+- Формат запросов: `POST passkeys/register` — `{name, credential}`, `POST passkeys/login` — `{credential}`; опции приходят как `{options}`.
 - На localhost passkeys работают в Chrome/Safari при `RP_ID=localhost`.
 - Для Apple Face ID / Touch ID используется стандарт WebAuthn — отдельный Apple OAuth не требуется.
 
@@ -100,6 +99,7 @@ FRONTEND_URL=http://localhost:8081
 |-------------|----------------------|------------|
 | `middleware` | `[]` | Middleware группы auth-маршрутов |
 | `auth_middleware` | `['auth:sanctum']` | Защищённые эндпоинты |
+| `throttle` | `['throttle:10,1']` | Лимит для login, register, password/*, passkeys/login |
 
 ## Очереди писем
 
@@ -116,6 +116,6 @@ Jobs:
 |---------|------------|
 | `oauth_accounts` | Привязка VK/Yandex к user |
 | `password_reset_tokens` | Токены сброса пароля |
-| `webauthn_credentials` | Passkeys (Laragear WebAuthn) |
+| `passkeys` | Passkeys (laravel/passkeys, `vendor:publish --tag=passkeys-migrations`) |
 
 Sanctum: `personal_access_tokens` — в приложении-хосте.

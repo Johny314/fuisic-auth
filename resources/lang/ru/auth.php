@@ -28,4 +28,8 @@ return [
     'passkey_registered' => 'Passkey успешно добавлен.',
     'verification_invalid' => 'Ссылка для подтверждения недействительна или устарела.',
     'passkey_removed' => 'Passkey удалён.',
+    'passkey_not_found' => 'Passkey не найден.',
+    'passkey_invalid' => 'Не удалось проверить passkey. Попробуйте ещё раз.',
+    'passkey_expired' => 'Время на подтверждение passkey истекло. Попробуйте ещё раз.',
+    'passkey_default_name' => 'Passkey',
 ];
