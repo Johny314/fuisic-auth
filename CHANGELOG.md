@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/Johny314/fuisic-auth/compare/v4.0.0...v4.0.1) (2026-09-26)
+
+
+### Исправления
+
+* password reset no longer fails with 500 ([3243e94](https://github.com/Johny314/fuisic-auth/commit/3243e947d7fc1f73af14f1bba4dc077e5f09ee6c))
+
 ## [4.0.0](https://github.com/Johny314/fuisic-auth/compare/v3.3.0...v4.0.0) (2026-09-26)
 
 
