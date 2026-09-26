@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/Johny314/fuisic-auth/compare/v3.2.0...v3.3.0) (2026-09-26)
+
+
+### Возможности
+
+* reject blocked users with 403 user_blocked on login and every request ([24e1e8f](https://github.com/Johny314/fuisic-auth/commit/24e1e8f746bfe60edf62c51501ab70582c5860e5))
+
 ## [3.2.0](https://github.com/Johny314/fuisic-auth/compare/v3.1.0...v3.2.0) (2026-09-26)
 
 
