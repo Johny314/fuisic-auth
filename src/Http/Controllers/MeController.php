@@ -17,9 +17,6 @@ class MeController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'email_verified_at' => $user->email_verified_at,
-            'user_type' => $user->user_type instanceof \BackedEnum
-                ? $user->user_type->value
-                : $user->user_type,
             'avatar_url' => $user->avatar_url ?? null,
             'oauth_providers' => method_exists($user, 'oauthAccounts')
                 ? $user->oauthAccounts()->select(['provider', 'provider_email', 'avatar'])->get()
