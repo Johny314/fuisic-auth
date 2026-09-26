@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/Johny314/fuisic-auth/compare/v3.0.0...v3.0.1) (2026-09-26)
+
+
+### Документация
+
+* release badges instead of hand-maintained versions. ([120dbe9](https://github.com/Johny314/fuisic-auth/commit/120dbe9348200986ac733b75f294e1a4af8eeb85))
+
 ## 3.0.0 - 2026-09-26
 
 - **BREAKING:** Laravel 13 и PHP 8.4+ (`illuminate/* ^13`).
