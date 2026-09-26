@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/Johny314/fuisic-auth/compare/v3.1.0...v3.2.0) (2026-09-26)
+
+
+### Возможности
+
+* login by email or username via the login field ([c347133](https://github.com/Johny314/fuisic-auth/commit/c34713304df22bbb3cec149ee801ec76e0a2df61))
+
 ## [3.1.0](https://github.com/Johny314/fuisic-auth/compare/v3.0.1...v3.1.0) (2026-09-26)
 
 
