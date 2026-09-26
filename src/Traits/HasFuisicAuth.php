@@ -53,4 +53,15 @@ trait HasFuisicAuth
     {
         return [];
     }
+
+    /**
+     * Действующая блокировка: ['reason' => видимая пользователю причина, 'until' => DateTimeInterface|null (бессрочно)]
+     * или null. Вход и запросы заблокированного → 403 user_blocked. Переопределяется в модели.
+     *
+     * @return array{reason: ?string, until: ?\DateTimeInterface}|null
+     */
+    public function authBlock(): ?array
+    {
+        return null;
+    }
 }

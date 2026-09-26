@@ -3,6 +3,7 @@
 namespace Fuisic\Auth\Http\Controllers;
 
 use Fuisic\Auth\Enums\OAuthProvider;
+use Fuisic\Auth\Exceptions\UserBlockedException;
 use Fuisic\Auth\Services\OAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -57,6 +58,20 @@ class OAuthController extends Controller
             $redirect = config('fuisic-auth.oauth.redirect_after_login') ?: $frontend.'/auth/oauth-callback';
 
             return redirect()->away($redirect.'?token='.urlencode((string) $result['token']));
+        } catch (UserBlockedException $e) {
+            if ($wantsJson) {
+                return $e->render();
+            }
+
+            // экрану блокировки на фронте нужны причина и срок — токена у него нет
+            $block = $e->payload();
+
+            return redirect()->away($frontend.'/auth/auth?'.http_build_query([
+                'oauth_error' => $block['message'],
+                'oauth_error_code' => $block['code'],
+                'block_reason' => $block['block']['reason'],
+                'block_until' => $block['block']['until'],
+            ]));
         } catch (\Throwable $e) {
             if ($wantsJson) {
                 $code = $e instanceof BadRequestHttpException ? 400 : 500;

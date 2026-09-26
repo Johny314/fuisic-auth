@@ -2,6 +2,7 @@
 
 namespace Fuisic\Auth;
 
+use Fuisic\Auth\Http\Middleware\EnsureUserIsNotBlocked;
 use Fuisic\Auth\Listeners\SocialiteWasCalledListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,8 @@ class FuisicAuthServiceProvider extends ServiceProvider
         }
 
         Event::listen(SocialiteWasCalled::class, SocialiteWasCalledListener::class);
+
+        Route::aliasMiddleware('fuisic-auth.not-blocked', EnsureUserIsNotBlocked::class);
 
         $prefix = config('fuisic-auth.route_prefix');
 

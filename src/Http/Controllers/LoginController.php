@@ -4,6 +4,7 @@ namespace Fuisic\Auth\Http\Controllers;
 
 use Fuisic\Auth\Services\AuthTokenService;
 use Fuisic\Auth\Services\EmailVerificationService;
+use Fuisic\Auth\Support\BlockedUsers;
 use Fuisic\Auth\Support\LoginCredentials;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\JsonResponse;
@@ -24,6 +25,7 @@ class LoginController extends Controller
         }
 
         $user = Auth::user();
+        BlockedUsers::ensureNotBlocked($user);
 
         // подтверждённый email нужен только для входа по email, не по логину
         if ($user instanceof MustVerifyEmail && $login->viaEmail()) {
