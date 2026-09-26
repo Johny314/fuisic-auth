@@ -128,6 +128,12 @@ class OAuthService
                     'email_verified_at' => $email ? now() : null,
                     'password' => null,
                 ]);
+
+                $role = config('fuisic-auth.register.default_role');
+
+                if ($role !== null && method_exists($user, 'assignRegistrationRole')) {
+                    $user->assignRegistrationRole($role);
+                }
             }
 
             $this->linkAccount($user, $provider, $socialiteUser);

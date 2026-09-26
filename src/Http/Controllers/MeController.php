@@ -12,7 +12,7 @@ class MeController extends Controller
     {
         $user = $request->user();
 
-        return response()->json([
+        return response()->json(array_merge([
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
@@ -25,6 +25,6 @@ class MeController extends Controller
                 ? $user->oauthAccounts()->select(['provider', 'provider_email', 'avatar'])->get()
                 : [],
             'has_password' => ! empty($user->password),
-        ]);
+        ], method_exists($user, 'authProfile') ? $user->authProfile() : []));
     }
 }
