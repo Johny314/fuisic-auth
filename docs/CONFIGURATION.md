@@ -170,3 +170,5 @@ Jobs:
 | `passkeys` | Passkeys (laravel/passkeys, `vendor:publish --tag=passkeys-migrations`) |
 
 Sanctum: `personal_access_tokens` — в приложении-хосте.
+
+Колонка `users.remember_token` (`$table->rememberToken()`) — тоже в приложении-хосте, рекомендуется: при сбросе пароля пакет выдаёт новый remember-токен, и «Запомнить меня» на других устройствах перестаёт действовать. Без колонки (или с пустым `getRememberTokenName()` у модели) сброс работает, токен просто не трогается.
