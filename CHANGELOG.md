@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/Johny314/fuisic-auth/compare/v3.3.0...v4.0.0) (2026-09-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* `GET /me` больше не содержит `user_type`. Клиенты должны определять роль по `roles`/`permissions`. Требуется fuisic-back без колонки `users.user_type` (Johny314/fuisic-back#29) или любая модель без этого поля.
+
+### Возможности
+
+* stop returning user_type from /me ([6d3930b](https://github.com/Johny314/fuisic-auth/commit/6d3930bf14bf31cc68170b0c3c41cdad5aee1b26))
+
 ## [3.3.0](https://github.com/Johny314/fuisic-auth/compare/v3.2.0...v3.3.0) (2026-09-26)
 
 
