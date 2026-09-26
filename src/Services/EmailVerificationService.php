@@ -10,7 +10,7 @@ class EmailVerificationService
 {
     public function send(MustVerifyEmail $user): void
     {
-        if ($user->hasVerifiedEmail()) {
+        if ($user->hasVerifiedEmail() || ! self::hasEmail($user)) {
             return;
         }
 
@@ -21,7 +21,8 @@ class EmailVerificationService
 
     public function ensureCanLogin(MustVerifyEmail $user): void
     {
-        if (! config('fuisic-auth.require_email_verification')) {
+        // без email подтверждать нечего (аккаунт со входом по логину)
+        if (! config('fuisic-auth.require_email_verification') || ! self::hasEmail($user)) {
             return;
         }
 
@@ -30,5 +31,10 @@ class EmailVerificationService
                 'email' => [__('fuisic-auth::auth.email_not_verified')],
             ])->status(403);
         }
+    }
+
+    public static function hasEmail(MustVerifyEmail $user): bool
+    {
+        return filled($user->getEmailForVerification());
     }
 }
