@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/Johny314/fuisic-auth/compare/v3.0.1...v3.1.0) (2026-09-26)
+
+
+### Возможности
+
+* role choice on registration and extra /me fields from the user model ([94b489f](https://github.com/Johny314/fuisic-auth/commit/94b489f8b64860ed6ad18e92ae5178ef1e6fd8cf))
+
 ## [3.0.1](https://github.com/Johny314/fuisic-auth/compare/v3.0.0...v3.0.1) (2026-09-26)
 
 
