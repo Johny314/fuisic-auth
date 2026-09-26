@@ -9,7 +9,8 @@
 | `FUISIC_AUTH_ROUTE_PREFIX` | `''` | Префикс маршрутов (пустой = `/register`, `/login`) |
 | `FUISIC_AUTH_USER_MODEL` | — | Eloquent-модель пользователя (fallback: `auth.providers.users.model`) |
 | `FUISIC_AUTH_TOKEN_NAME` | `api-token` | Имя Sanctum-токена |
-| `FUISIC_AUTH_REQUIRE_EMAIL_VERIFICATION` | `true` | Блокировать login без подтверждённого email |
+| `FUISIC_AUTH_REQUIRE_EMAIL_VERIFICATION` | `true` | Блокировать вход по email без подтверждения (вход по логину и пользователи без email не проверяются) |
+| `FUISIC_AUTH_USERNAME_COLUMN` | — | Колонка логина для входа без email (`login.username_column`) |
 | `FRONTEND_URL` | `APP_URL` | URL фронтенда для ссылок в письмах |
 | `FUISIC_AUTH_QUEUE_CONNECTION` | `QUEUE_CONNECTION` | Очередь для писем |
 | `FUISIC_AUTH_VERIFICATION_QUEUE` | `auth.notifications` | Очередь verification |
@@ -92,6 +93,16 @@ FRONTEND_URL=http://localhost:8081
 - Для Apple Face ID / Touch ID используется стандарт WebAuthn — отдельный Apple OAuth не требуется.
 
 Подробнее про VK: [VK.md](VK.md).
+
+## Вход по логину
+
+| Ключ config | По умолчанию | Назначение |
+|-------------|--------------|------------|
+| `login.username_column` | `null` | Колонка модели с логином (например `username`); `null` — `POST /login` принимает только email |
+
+Поле `login` в `POST /login`: значение с `@` ищется по `email`, иначе — по `login.username_column` через `lower(колонка) = lower(значение)`, то есть без учёта регистра. Формат логина, его уникальность и то, кто его задаёт, остаются за приложением; логин не должен содержать `@`. Старое поле `email` принимается как раньше.
+
+Подтверждение email (`require_email_verification`) требуется только при входе по email. Пользователь без email входит по логину без подтверждения; `POST /email/verify/resend` для него отвечает 422. `/password/forgot` работает только по email — пароль такому пользователю сбрасывает приложение (например, родитель в fuisic-back). В passkey его аккаунт подписан логином (`getPasskeyUsername()` в `HasFuisicAuth`).
 
 ## Регистрация и роли
 
