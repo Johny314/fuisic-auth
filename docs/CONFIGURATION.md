@@ -93,6 +93,18 @@ FRONTEND_URL=http://localhost:8081
 
 Подробнее про VK: [VK.md](VK.md).
 
+## Регистрация и роли
+
+| Ключ config | По умолчанию | Назначение |
+|-------------|--------------|------------|
+| `register.validation` | `[]` | Дополнительные правила валидации `POST /register` |
+| `register.fillable` | `[]` | Поля запроса, которые попадают в модель |
+| `register.defaults` | `[]` | Значения атрибутов нового пользователя |
+| `register.roles` | `[]` | Роли на выбор (поле `role`); пусто — поле не принимается |
+| `register.default_role` | `null` | Роль без выбора и для новых пользователей через OAuth |
+
+Роль назначает `assignRegistrationRole($role)` из `HasFuisicAuth` — по умолчанию `assignRole()` (spatie/laravel-permission), модель может переопределить. Поля сверх стандартных в `GET /me` — метод модели `authProfile(): array`.
+
 ## Middleware
 
 | Ключ config | Значение по умолчанию | Назначение |

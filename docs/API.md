@@ -17,9 +17,12 @@ Authorization: Bearer {token}
   "name": "Иван Иванов",
   "email": "ivan@example.com",
   "password": "secret123",
-  "password_confirmation": "secret123"
+  "password_confirmation": "secret123",
+  "role": "teacher"
 }
 ```
+
+`role` — необязательно, одно из `register.roles` в конфиге (без него — `register.default_role`). Если `register.roles` пуст, поле не принимается.
 
 **201** — регистрация успешна, отправлено письмо:
 
@@ -27,7 +30,7 @@ Authorization: Bearer {token}
 { "message": "Регистрация успешна. Подтвердите email — письмо отправлено." }
 ```
 
-Дополнительные поля (например `user_type`) настраиваются в `config/fuisic-auth.php` → `register`.
+Дополнительные поля модели настраиваются в `config/fuisic-auth.php` → `register`.
 
 ---
 
@@ -81,6 +84,8 @@ Authorization: Bearer {token}
   "has_password": true
 }
 ```
+
+Дополнительные поля (например `roles`, `permissions`) добавляет модель пользователя методом `authProfile()`.
 
 ## Email verification
 

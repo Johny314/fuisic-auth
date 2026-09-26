@@ -10,17 +10,23 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterController extends Controller
 {
     public function __invoke(Request $request, AuthTokenService $tokens, EmailVerificationService $verification): JsonResponse
     {
+        $roles = config('fuisic-auth.register.roles', []);
+
         $validated = $request->validate(array_merge([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::defaults()],
+        ], $roles === [] ? [] : [
+            'role' => ['sometimes', 'string', Rule::in($roles)],
         ], config('fuisic-auth.register.validation', [])));
 
         $userModel = UserModel::class();
@@ -32,8 +38,17 @@ class RegisterController extends Controller
             ))->all(),
             ['password' => Hash::make($validated['password'])]
         );
+        $role = $validated['role'] ?? config('fuisic-auth.register.default_role');
 
-        $user = $userModel::query()->create($attributes);
+        $user = DB::transaction(function () use ($userModel, $attributes, $role) {
+            $user = $userModel::query()->create($attributes);
+
+            if ($role !== null && method_exists($user, 'assignRegistrationRole')) {
+                $user->assignRegistrationRole($role);
+            }
+
+            return $user;
+        });
 
         if ($user instanceof MustVerifyEmail) {
             SendVerificationEmailJob::dispatch($user)
