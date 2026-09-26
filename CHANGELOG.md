@@ -1,7 +1,5 @@
 # Changelog
 
-## Unreleased
-
 ## 3.0.0 - 2026-09-26
 
 - **BREAKING:** Laravel 13 и PHP 8.4+ (`illuminate/* ^13`).
