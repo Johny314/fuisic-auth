@@ -46,6 +46,10 @@ class EmailVerificationController extends Controller
             return response()->json(['message' => __('fuisic-auth::auth.email_already_verified')]);
         }
 
+        if (! EmailVerificationService::hasEmail($request->user())) {
+            return response()->json(['message' => __('fuisic-auth::auth.email_missing')], 422);
+        }
+
         $verification->send($request->user());
 
         return response()->json(['message' => __('fuisic-auth::auth.verification_sent')]);

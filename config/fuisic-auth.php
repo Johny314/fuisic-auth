@@ -20,6 +20,11 @@ return [
 
     'route_prefix' => env('FUISIC_AUTH_ROUTE_PREFIX', ''),
 
+    'login' => [
+        // Колонка логина для входа по `login` без email (например `username`); null — вход только по email
+        'username_column' => env('FUISIC_AUTH_USERNAME_COLUMN'),
+    ],
+
     'register' => [
         'validation' => [],
         'fillable' => [],

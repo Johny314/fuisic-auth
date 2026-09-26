@@ -5,6 +5,7 @@ namespace Fuisic\Auth\Http\Controllers;
 use Fuisic\Auth\Services\AuthTokenService;
 use Fuisic\Auth\Services\EmailVerificationService;
 use Fuisic\Auth\Support\BlockedUsers;
+use Fuisic\Auth\Support\LoginCredentials;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,12 +16,9 @@ class LoginController extends Controller
 {
     public function __invoke(Request $request, AuthTokenService $tokens, EmailVerificationService $verification): JsonResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $login = LoginCredentials::fromRequest($request);
 
-        if (! Auth::attempt($credentials)) {
+        if (! Auth::attempt($login->credentials())) {
             return response()->json([
                 'message' => __('fuisic-auth::auth.invalid_credentials'),
             ], 401);
@@ -29,7 +27,8 @@ class LoginController extends Controller
         $user = Auth::user();
         BlockedUsers::ensureNotBlocked($user);
 
-        if ($user instanceof MustVerifyEmail) {
+        // подтверждённый email нужен только для входа по email, не по логину
+        if ($user instanceof MustVerifyEmail && $login->viaEmail()) {
             $verification->ensureCanLogin($user);
         }
 

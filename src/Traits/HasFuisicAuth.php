@@ -24,6 +24,18 @@ trait HasFuisicAuth
     }
 
     /**
+     * Имя аккаунта в authenticator'е: email, для аккаунта без email — логин.
+     */
+    public function getPasskeyUsername(): string
+    {
+        $column = config('fuisic-auth.login.username_column');
+
+        return $this->getAttribute('email')
+            ?? ($column ? $this->getAttribute($column) : null)
+            ?? (string) $this->getAuthIdentifier();
+    }
+
+    /**
      * Роль нового пользователя (регистрация, первый вход через OAuth).
      * По умолчанию — assignRole() из spatie/laravel-permission, если он подключён.
      */

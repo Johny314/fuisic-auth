@@ -1,10 +1,11 @@
 <?php
 
 return [
-    'invalid_credentials' => 'Неверный email или пароль.',
+    'invalid_credentials' => 'Неверный логин или пароль.',
     'logged_out' => 'Вы вышли из системы.',
     'registered_verify_email' => 'Регистрация успешна. Подтвердите email — письмо отправлено.',
     'email_not_verified' => 'Подтвердите email перед входом.',
+    'email_missing' => 'Сначала укажите email в профиле.',
     'email_verified' => 'Email успешно подтверждён.',
     'email_already_verified' => 'Email уже подтверждён.',
     'verification_sent' => 'Письмо для подтверждения отправлено.',
