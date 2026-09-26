@@ -4,6 +4,7 @@ namespace Fuisic\Auth\Http\Controllers;
 
 use Fuisic\Auth\Passkeys\PasskeyOptionsStore;
 use Fuisic\Auth\Services\AuthTokenService;
+use Fuisic\Auth\Support\BlockedUsers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -87,6 +88,8 @@ class PasskeyController extends Controller
         if (! Passkeys::allowsLogin($request, $passkey)) {
             return response()->json(['message' => __('fuisic-auth::auth.passkey_login_failed')], 401);
         }
+
+        BlockedUsers::ensureNotBlocked($user);
 
         return response()->json([
             'token' => $tokens->issue($user),

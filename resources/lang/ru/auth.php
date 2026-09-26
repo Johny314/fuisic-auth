@@ -32,4 +32,5 @@ return [
     'passkey_invalid' => 'Не удалось проверить passkey. Попробуйте ещё раз.',
     'passkey_expired' => 'Время на подтверждение passkey истекло. Попробуйте ещё раз.',
     'passkey_default_name' => 'Passkey',
+    'user_blocked' => 'Аккаунт заблокирован.',
 ];

@@ -4,6 +4,7 @@ namespace Fuisic\Auth\Services;
 
 use Fuisic\Auth\Enums\OAuthProvider;
 use Fuisic\Auth\Models\OAuthAccount;
+use Fuisic\Auth\Support\BlockedUsers;
 use Fuisic\Auth\Support\UserModel;
 use Fuisic\Auth\Traits\HasOAuthAccounts;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -52,6 +53,7 @@ class OAuthService
 
         if ($stateData['intent'] === 'link') {
             $user = $this->resolveUserModel()::query()->findOrFail($stateData['user_id']);
+            BlockedUsers::ensureNotBlocked($user);
             $this->linkAccount($user, $providerEnum, $socialiteUser);
 
             return [
@@ -61,6 +63,7 @@ class OAuthService
         }
 
         $user = $this->loginOrRegister($providerEnum, $socialiteUser);
+        BlockedUsers::ensureNotBlocked($user);
         $token = $this->tokens->issue($user);
 
         return [

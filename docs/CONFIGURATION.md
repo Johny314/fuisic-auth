@@ -105,12 +105,40 @@ FRONTEND_URL=http://localhost:8081
 
 Роль назначает `assignRegistrationRole($role)` из `HasFuisicAuth` — по умолчанию `assignRole()` (spatie/laravel-permission), модель может переопределить. Поля сверх стандартных в `GET /me` — метод модели `authProfile(): array`.
 
+## Блокировка пользователей
+
+Пакет не хранит блокировки — он спрашивает модель пользователя методом `authBlock()` из `HasFuisicAuth` (по умолчанию `null` — блокировок нет). Переопределите его в модели:
+
+```php
+public function authBlock(): ?array
+{
+    $block = $this->activeBlock(); // своя логика: не снята и срок не истёк
+
+    return $block ? ['reason' => $block->reason, 'until' => $block->until] : null; // until: DateTimeInterface|null
+}
+```
+
+Если метод вернул массив:
+
+- `POST /login`, `POST /passkeys/login`, OAuth-callback → 403 `user_blocked` (формат — [API.md](API.md#блокировка)), токен не выдаётся;
+- любые запросы через middleware `fuisic-auth.not-blocked` (класс `Fuisic\Auth\Http\Middleware\EnsureUserIsNotBlocked`) → тот же 403. Он уже в `auth_middleware` пакета; для маршрутов приложения:
+
+```php
+// после auth:* — пользователь запроса
+Route::middleware(['auth:sanctum', 'fuisic-auth.not-blocked'])->group(...);
+
+// на всю группу api, включая публичные маршруты с токеном: guard указывается явно
+$middleware->api(append: [EnsureUserIsNotBlocked::class.':sanctum']);
+```
+
+Отзыв уже выданных токенов и сессий при блокировке — задача приложения (`$user->tokens()->delete()`). Проверка из своего кода: `Fuisic\Auth\Support\BlockedUsers::ensureNotBlocked($user)` (бросает `Fuisic\Auth\Exceptions\UserBlockedException`, которая сама рендерится в 403).
+
 ## Middleware
 
 | Ключ config | Значение по умолчанию | Назначение |
 |-------------|----------------------|------------|
 | `middleware` | `[]` | Middleware группы auth-маршрутов |
-| `auth_middleware` | `['auth:sanctum']` | Защищённые эндпоинты |
+| `auth_middleware` | `['auth:sanctum', 'fuisic-auth.not-blocked']` | Защищённые эндпоинты (+ 403 заблокированному) |
 | `throttle` | `['throttle:10,1']` | Лимит для login, register, password/*, passkeys/login |
 
 ## Очереди писем

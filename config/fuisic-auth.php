@@ -4,7 +4,8 @@ return [
 
     'middleware' => [],
 
-    'auth_middleware' => ['auth:sanctum'],
+    // fuisic-auth.not-blocked — 403 user_blocked заблокированному (хук модели authBlock())
+    'auth_middleware' => ['auth:sanctum', 'fuisic-auth.not-blocked'],
 
     // Лимит для login/register/password/passkey-login (попыток в минуту с одного IP)
     'throttle' => ['throttle:10,1'],

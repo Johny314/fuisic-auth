@@ -4,6 +4,7 @@ namespace Fuisic\Auth\Http\Controllers;
 
 use Fuisic\Auth\Services\AuthTokenService;
 use Fuisic\Auth\Services\EmailVerificationService;
+use Fuisic\Auth\Support\BlockedUsers;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class LoginController extends Controller
         }
 
         $user = Auth::user();
+        BlockedUsers::ensureNotBlocked($user);
 
         if ($user instanceof MustVerifyEmail) {
             $verification->ensureCanLogin($user);

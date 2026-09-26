@@ -58,7 +58,7 @@ Authorization: Bearer {token}
 }
 ```
 
-**401** — неверные credentials. **403** — email не подтверждён.
+**401** — неверные credentials. **403** — email не подтверждён или пользователь заблокирован (см. [Блокировка](#блокировка)).
 
 ---
 
@@ -147,6 +147,7 @@ Signed URL из письма. Подтверждает email без автори
 - логин: `{FRONTEND_URL}/auth/oauth-callback?token=...`
 - привязка: `{FRONTEND_URL}/profile/edit?oauth=linked&provider=...`
 - ошибка: `{FRONTEND_URL}/auth/auth?oauth_error=...`
+- пользователь заблокирован: `{FRONTEND_URL}/auth/auth?oauth_error=...&oauth_error_code=user_blocked&block_reason=...&block_until=...` (`block_until` нет — бессрочно)
 
 Если запрос с `Accept: application/json`, вместо редиректа отдаётся JSON:
 
@@ -198,12 +199,33 @@ Signed URL из письма. Подтверждает email без автори
 
 `GET /passkeys` → `{ passkeys: [{ id, name, last_used_at, created_at }] }`.
 
+## Блокировка
+
+Вход заблокированного пользователя (пароль, passkey, OAuth) и любой его запрос к защищённым маршрутам (`auth_middleware`) → **403** в одном формате:
+
+```json
+{
+  "message": "Аккаунт заблокирован.",
+  "code": "user_blocked",
+  "block": {
+    "reason": "Спам в комментариях",
+    "until": "2026-10-03T12:00:00.000000Z"
+  }
+}
+```
+
+- `block.reason` — причина, видимая пользователю; `block.until` — ISO 8601 (UTC) или `null` — бессрочно.
+- Отличить от других 403 (email не подтверждён) — по `code`.
+- При неверном пароле — обычный 401: факт блокировки не раскрывается без пароля.
+- Блокировки хранит приложение: пакет спрашивает модель через `authBlock()` (см. [CONFIGURATION.md](CONFIGURATION.md#блокировка-пользователей)). Отзыв токенов при блокировке — тоже на стороне приложения.
+
 ## Коды ошибок
 
 | Код | Ситуация |
 |-----|----------|
 | 401 | Неверный login / нет токена |
 | 403 | Email не подтверждён / невалидная verification URL |
+| 403 `user_blocked` | Пользователь заблокирован: вход и любые защищённые запросы (формат — [Блокировка](#блокировка)) |
 | 404 | OAuth-провайдер отключён |
 | 422 | Validation errors (в т.ч. невалидный/просроченный passkey) |
 | 429 | Слишком много попыток входа/регистрации (`throttle`) |
